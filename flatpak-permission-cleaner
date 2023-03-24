@@ -1,0 +1,42 @@
+#!/bin/bash
+
+printf """
+
+- - - Interactive Flatpak Permission Cleaner - - - 
+
+home=$HOME
+media="/run/media/$USER/"
+
+# Get list of installed flatpaks
+flatpak_list=$(flatpak list --app --columns=ref)
+
+# Check each flatpak for host file permissions
+while read -r flatpak_ref; do
+  flatpak_info=$(flatpak info --show-permissions "$flatpak_ref")
+  has_host_permission=$(echo "$flatpak_info" | grep "filesystem:host" | wc -l)
+
+  if [ "$has_host_permission" -gt 0 ]; then
+    echo "Flatpak $flatpak_ref has host file permissions. Change to these?"
+    echo "/home /var/home /run/media/$USER /mnt /var/mnt mtp:/"
+    read -p "Enter Y to use these directories or E to edit them, anything else to skip: > " response
+    if [ "$response" == "Y" ] || [ "$response" == "y" ]; then
+      echo "Granting r/w permissions to these directories..."
+      flatpak override --user "$flatpak_ref" --filesystem=host:$home  --filesystem=host:$media --filesystem=host:/mnt --filesystem=host:/var/mnt --filesystem=mtp:/
+    elif [ "$response" == "E" ] || [ "$response" == "e" ]; then
+        echo "Enter the directories for r/w permission, separated by space:"
+        read -r directories
+        directories=$(echo "$directories" | tr '[:upper:]' '[:lower:]')
+
+        if [ -n "$directories" ]; then
+            echo "Granting r/w permissions to these directories..."
+            for dir in $directories; do
+                flatpak override --user "$flatpak_ref" --filesystem=host:"/$dir"
+            done
+        else
+            echo "No directories specified. Skipping flatpak $flatpak_ref..."
+        fi
+    else
+      echo "Invalid response. Skipping flatpak $flatpak_ref..."
+    fi
+  fi
+done <<< "$flatpak_list"
