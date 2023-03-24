@@ -4,6 +4,9 @@ printf """
 
 - - - Interactive Flatpak Permission Cleaner - - - 
 
+
+"""
+
 home=$HOME
 media="/run/media/$USER/"
 
