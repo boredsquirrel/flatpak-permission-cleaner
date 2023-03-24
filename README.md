@@ -16,6 +16,6 @@ You have the option to set different filesystems though, just enter your locatio
 Install:
 
 ```
-wget -O ~/.local/bin/ https://github.com/trytomakeyouprivate/flatpak-permission-cleaner/raw/main/flatpak-permission-cleaner
+wget https://github.com/trytomakeyouprivate/flatpak-permission-cleaner/raw/main/flatpak-permission-cleaner -p ~/.local/bin/
 chmod +x ~/.local/bin/flatpak-permission-cleaner
 ```
